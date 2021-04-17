@@ -62,9 +62,7 @@ module ee354_GCD_top
 	wire in_AB_Pulse, CEN_Pulse, BtnR_Pulse, BtnU_Pulse;
 	wire q_I, q_Sub, q_Mult, q_Done;
 	wire [7:0] A, B, AB_GCD, i_count;
-	reg [7:0] Ain;
-	reg [7:0] Bin;
-	reg A_bar_slash_B;
+	reg integer input_arr [7:0][7:0];
 	reg [3:0]	SSD;
 	wire [3:0]	SSD3, SSD2, SSD1, SSD0;
 	reg [7:0]  SSD_CATHODES;
@@ -126,21 +124,26 @@ ee354_debouncer #(.N_dc(28)) ee354_debouncer_1
         (.CLK(sys_clk), .RESET(Reset), .PB(BtnR), .DPB( ), 
 		.SCEN(BtnR_Pulse), .MCEN( ), .CCEN( ));
 
-ee354_debouncer #(.N_dc(28)) ee354_debouncer_0 // ****** TODO  in Part 2 ******
+ee354_debouncer #(.N_dc(28)) ee354_debouncer_0 
         (.CLK(sys_clk), .RESET(Reset), .PB(BtnU), .DPB( ), // complete this instantiation
 		.SCEN(BtnU_Pulse), .MCEN( ), .CCEN( )); // to produce BtnU_Pulse from BtnU
 		
 //------------
 // DESIGN
-	// On two pushes of BtnR, numbers A and B are recorded in Ain and Bin
-    // (registers of the TOP) respectively
 	always @ (posedge sys_clk, posedge Reset)
 	begin
 		if(Reset)
 		begin
-			Ain <= 0;
-			Bin <= 0;
-			A_bar_slash_B <= 0;
+			//initialize matrix to identity matrix
+			integer i, j;
+			for(i = 0; i < 8; i++) begin
+				for(j = 0; j < 8; j++) begin
+					if(i == j)
+						input_arr[i][i] <= 1;
+					else
+						input_arr[i][j] <= 0;
+				end
+			end
 		end
 		else
 		begin
@@ -152,7 +155,7 @@ ee354_debouncer #(.N_dc(28)) ee354_debouncer_0 // ****** TODO  in Part 2 ******
 				begin
 					A_bar_slash_B <= ~ A_bar_slash_B;
 					if (A_bar_slash_B == 1'b0)
-						Ain <= {Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0};
+						input_arr <= {Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0};
 					else
 						Bin <= {Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0};
 				end
@@ -161,7 +164,7 @@ ee354_debouncer #(.N_dc(28)) ee354_debouncer_0 // ****** TODO  in Part 2 ******
 	
 	// the state machine module
 	ee354_GCD ee354_GCD_1(.Clk(sys_clk), .CEN(CEN_Pulse), .Reset(Reset), .Start(Start_Ack_Pulse), .Ack(Start_Ack_Pulse), 
-						  .Ain(Ain), .Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count),
+						  .input_arr(input_arr), .Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count),
 						  .q_I(q_I), .q_Sub(q_Sub), .q_Mult(q_Mult), .q_Done(q_Done));
 
 //------------
