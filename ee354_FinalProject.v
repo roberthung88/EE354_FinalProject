@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// Author:			Robert (Jui Po) Hung
+// Author:			Robert (Jui Po) Hung, Robert Sutherland
 // Create Date:   04/16/21
 // File Name:		ee354_FinalProject.v 
 // Description: 
