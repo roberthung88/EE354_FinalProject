@@ -71,7 +71,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 								indexj = 0;
 								for(i = 1; i < 4; i++) begin
 									for(j = 0; j < 4; j++) begin
-										if(j == sub_index)
+										if(j == sub_index[4])
 											j++;
 										three[indexi][indexj] = four[i][j];
 										indexi++;
@@ -85,7 +85,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 								indexj = 0;
 								for(i = 1; i < 5; i++) begin
 									for(j = 0; j < 5; j++) begin
-										if(j == sub_index)
+										if(j == sub_index[3])
 											j++;
 										four[indexi][indexj] = five[i][j];
 										indexi++;
@@ -99,7 +99,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 								indexj = 0;
 								for(i = 1; i < 6; i++) begin
 									for(j = 0; j < 6; j++) begin
-										if(j == sub_index)
+										if(j == sub_index[2])
 											j++;
 										five[indexi][indexj] = six[i][j];
 										indexi++;
@@ -113,7 +113,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 								indexj = 0;
 								for(i = 1; i < 7; i++) begin
 									for(j = 0; j < 7; j++) begin
-										if(j == sub_index)
+										if(j == sub_index[1])
 											j++;
 										six[indexi][indexj] = seven[i][j];
 										indexi++;
@@ -127,7 +127,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 								indexj = 0;
 								for(i = 1; i < 8; i++) begin
 									for(j = 0; j < 8; j++) begin
-										if(j == sub_index)
+										if(j == sub_index[0])
 											j++;
 										seven[indexi][indexj] = input_arr[i][j];
 										indexi++;
@@ -177,7 +177,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 							//calculated very last 3x3 matrix
 							if(sub_index[4] == 3){
 								sub_index[4] = 0;
-								
+								size_curr++;
 								// update values
 								if(sub_index[3] % 2 == 0){
 									temp_val[3] += (temp_val[4]*five[0][sub_index[3]]);
@@ -188,7 +188,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 								// calculated very last 4x4 matrix
 								if(sub_index[3] == 4){
 									sub_index[3] = 0;
-								
+									size_curr++;
 									// update values
 									if(sub_index[2] % 2 == 0){
 										temp_val[2] += (temp_val[3]*six[0][sub_index[2]]);
@@ -198,7 +198,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 									// calculated very last 5x5 matrix
 									if(sub_index[2] == 5){
 										sub_index[2] = 0;
-								
+										size_curr++;
 										// update values
 										if(sub_index[1] % 2 == 0){
 											temp_val[1] += (temp_val[2]*seven[0][sub_index[1]]);
@@ -208,7 +208,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 										// calculated very last 6x6 matrix
 										if(sub_index[1] == 6){
 											sub_index[1] = 0;
-								
+											size_curr++;
 											// update values
 											if(sub_index[0] % 2 == 0){
 												temp_val[0] += (temp_val[1]*input_arr[0][sub_index[0]]);
