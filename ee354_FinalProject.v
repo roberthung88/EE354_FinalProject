@@ -29,11 +29,10 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 	reg integer five [4:0][4:0];
 	reg integer four [3:0][3:0];
 	reg integer three [2:0][2:0];
-	reg integer temp_val [8*7*6*5*4 - 1:0];
-	reg [8*7*6*5*4 - 1:0] status;
+	reg integer temp_val[5:0]; // temp_val[0] stores det
 	reg [2:0] size_curr; //current size of matrix being worked on
-	reg [2:0] sub_index; //column to "ignore" while calculating determinant
-	
+	reg [2:0] sub_index [4:0]; //column to "ignore" while calculating determinant
+
 	localparam 	
 	I = 4'b0001, LOAD = 4'b0010, COMP = 4'b0100, DONE = 4'b1000, UNK = 4'bXXXX;
 	
@@ -43,9 +42,8 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 		if(Reset) begin
 			state <= I;		  	
 			size_curr = 3'bx;
-			sub_index = 3'bx;
-			temp_val = 6720'bx;
-			status = 6720'bx;
+			sub_index = '{default:x}; 
+			temp_val = 'bx;
 		end
 		else				
 			case(state)	
@@ -55,8 +53,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 					if (Start) state <= LOAD;
 					// data transfers
 					size_curr = 3'd7;
-					sub_index = 3'd0;
-					status = 6720'd0;
+					sub_index = '{default:0}; 
 					temp_val = '{default:0}; 
 				end		
 				LOAD:
@@ -68,7 +65,20 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 							3'b000: //impossible case
 							3'b001: //impossible case
 							3'b010://impossible case
-							3'b011: //impossible case
+							3'b011: begin
+								integer i, j, indexi, indexj;
+								indexi = 0;
+								indexj = 0;
+								for(i = 1; i < 4; i++) begin
+									for(j = 0; j < 4; j++) begin
+										if(j == sub_index)
+											j++;
+										three[indexi][indexj] = four[i][j];
+										indexi++;
+										indexj++;
+									end
+								end
+							end
 							3'b100: begin
 								integer i, j, indexi, indexj;
 								indexi = 0;
@@ -131,12 +141,111 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 					end
 				
 				COMP:
-					if (Ack)	state <= I;
+					begin
+						// state transfers
+						if(sub_index[0] == 7 && sub_index[1] == 6 && sub_index[2] == 5 && sub_index[3] == 4 && sub_index[4] == 3){
+							//calculating the very last matrix
+							state <= DONE;
+						}else{
+							state <= LOAD;
+						}
+						
+						// data transfers
+						if(size_curr != 3){
+							size_curr--;
+						}else{
+							integer a = three[0][0];
+							integer b = three[0][1];
+							integer c = three[0][2];
+							integer d = three[1][0];
+							integer e = three[1][1];
+							integer f = three[1][2];
+							integer g = three[2][0];
+							integer h = three[2][1];
+							integer i = three[2][2];
+
+							// temp storage for 3x3 matrix det
+							temp_val[5] = a*(e*i-f*h) - b*(d*i-f*g) + c*(d*h-e*g);
+
+							// add det to 4x4
+							if(sub_index[4] % 2 == 0){
+								temp_val[4] += (temp_val[5]*four[0][sub_index[4]]);
+							}else{
+								temp_val[4] -= (temp_val[5]*four[0][sub_index[4]]);
+							}
+
+							//calculated very last 3x3 matrix
+							if(sub_index[4] == 3){
+								sub_index[4] = 0;
+								
+								// update values
+								if(sub_index[3] % 2 == 0){
+									temp_val[3] += (temp_val[4]*five[0][sub_index[3]]);
+								}else{
+									temp_val[3] -= (temp_val[4]*five[0][sub_index[3]]);
+								}
+
+								// calculated very last 4x4 matrix
+								if(sub_index[3] == 4){
+									sub_index[3] = 0;
+								
+									// update values
+									if(sub_index[2] % 2 == 0){
+										temp_val[2] += (temp_val[3]*six[0][sub_index[2]]);
+									}else{
+										temp_val[2] -= (temp_val[3]*six[0][sub_index[2]]);
+									}
+									// calculated very last 5x5 matrix
+									if(sub_index[2] == 5){
+										sub_index[2] = 0;
+								
+										// update values
+										if(sub_index[1] % 2 == 0){
+											temp_val[1] += (temp_val[2]*seven[0][sub_index[1]]);
+										}else{
+											temp_val[1] -= (temp_val[2]*seven[0][sub_index[1]]);
+										}
+										// calculated very last 6x6 matrix
+										if(sub_index[1] == 6){
+											sub_index[1] = 0;
+								
+											// update values
+											if(sub_index[0] % 2 == 0){
+												temp_val[0] += (temp_val[1]*input_arr[0][sub_index[0]]);
+											}else{
+												temp_val[0] -= (temp_val[1]*input_arr[0][sub_index[0]]);
+											}
+											// calculated very last 7x7 matrix
+											if(sub_index[0] == 7){
+												//calculated everything
+												temp_val[0] -= (temp_val[1]*input_arr[0][sub_index[0]]);
+												det <= temp_val[0];
+											}else{
+												sub_index[0]++;
+											}
+										}else{
+											sub_index[1]++;
+										}
+									}else{
+										sub_index[2]++;
+									}
+								}else{
+									// calculate next 4x4
+									sub_index[3]++;
+								}
+							}else{
+								// haven't calculated very last 3x3 matrix, so calculate next 3x3 det
+								sub_index[4]++;
+							}
+						}
+
+					end
 				DONE:
 					begin
 						// state transfers
 						
 						// data transfers
+					end
 				default:		
 					state <= UNK;
 			endcase
