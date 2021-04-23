@@ -243,8 +243,10 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 				DONE:
 					begin
 						// state transfers
-						
+						if(Ack)
+							state <= I;
 						// data transfers
+						
 					end
 				default:		
 					state <= UNK;
