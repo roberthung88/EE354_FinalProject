@@ -49,7 +49,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 			case(state)	
 				I:
 				begin
-					// state transfers
+					// state transfers on start condtion
 					if (Start) state <= LOAD;
 					// data transfers
 					size_curr = 3'd7;
@@ -64,7 +64,7 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 						case(size_curr)
 							3'b000: //impossible case
 							3'b001: //impossible case
-							3'b010://impossible case
+							3'b010://impossible case must be at least a 3X3
 							3'b011: begin
 								integer i, j, indexi, indexj;
 								indexi = 0;
