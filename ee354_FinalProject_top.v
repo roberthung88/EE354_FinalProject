@@ -24,7 +24,7 @@ module ee354_GCD_top
 		
 		BtnL, BtnU, BtnD, BtnR,            // the Left, Up, Down, and the Right buttons BtnL, BtnR,
 		BtnC,                              // the center button (this is our reset in most of our designs)
-		Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0, // 8 switches
+		Sw15, Sw14, Sw13, Sw12, Sw11, Sw10, Sw9, Sw8, Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0, // 8 switches
 		Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0, // 8 LEDs
 		An3, An2, An1, An0,			       // 4 anodes
 		An7, An6, An5, An4,                // another 4 anodes which are not used
@@ -37,7 +37,7 @@ module ee354_GCD_top
 	input		ClkPort;	
 	// Project Specific Inputs
 	input		BtnL, BtnU, BtnD, BtnR, BtnC;	
-	input		Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0;
+	input		Sw15, Sw14, Sw13, Sw12, Sw11, Sw10, Sw9, Sw8, Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0;
 	
 	
 	/*  OUTPUTS */
@@ -55,17 +55,19 @@ module ee354_GCD_top
 	/*  LOCAL SIGNALS */
 	wire		Reset, ClkPort;
 	wire		board_clk, sys_clk;
-	wire [1:0] 	ssdscan_clk;
+	wire [2:0] 	ssdscan_clk; //modified clk to include more SSDs (FINAL)
 	reg [26:0]	DIV_CLK;
 	
+	
 	wire Start_Ack_Pulse;
-	wire in_AB_Pulse, CEN_Pulse, BtnR_Pulse, BtnU_Pulse;
-	wire q_I, q_Sub, q_Mult, q_Done;
+	wire in_AB_Pulse, CEN_Pulse, BtnR_Pulse, BtnU_Pulse; 
+	wire q_I, q_Load, q_Comp, q_Done; //changed this to include correct state (FINAL)
 	wire [7:0] A, B, AB_GCD, i_count;
-	reg integer input_arr [7:0][7:0];
+	reg integer input_arr [7:0][7:0]; //Added this for the input array (FINAL)
+	reg [31:0] det; // added this reg to hold det
 	reg [3:0]	SSD;
-	wire [3:0]	SSD3, SSD2, SSD1, SSD0;
-	reg [7:0]  SSD_CATHODES;
+	wire [3:0]	SSD7, SSD6, SSD5, SSD4,SSD3, SSD2, SSD1, SSD0; //added all SSDs (FINAL)
+	reg [7:0]  SSD_CATHODES; 
 	
 //------------	
 // Disable the three memories so that they do not interfere with the rest of the design.
@@ -112,10 +114,10 @@ module ee354_GCD_top
 	// Is the debouncing of the start/ack signal necessary? Discuss with your TA
 
 ee354_debouncer #(.N_dc(28)) ee354_debouncer_2 
-        (.CLK(sys_clk), .RESET(Reset), .PB(BtnL), .DPB( ), 
-		.SCEN(Start_Ack_Pulse), .MCEN( ), .CCEN( ));
+        (.CLK(sys_clk), .RESET(Reset), .PB(BtnL), .DPB( ),
+		.SCEN(BtnL_Pulse), .MCEN( ), .CCEN( )); // changed from Start_Ack_Pulse to BtnL_Pulse (final)
 		 		 
-		 // BtnR is used to generate in_AB_Pulse to record the values of 
+		 // BtnR is used to generate in_AB_Pulse to record the values of need to modify this TODO(FINAL)
 		 // the inputs A and B as set on the switches.
 		 // BtnU is used as CEN_Pulse to allow single-stepping
 	assign {in_AB_Pulse, CEN_Pulse} = {BtnR_Pulse, BtnU_Pulse};
@@ -129,7 +131,7 @@ ee354_debouncer #(.N_dc(28)) ee354_debouncer_0
 		.SCEN(BtnU_Pulse), .MCEN( ), .CCEN( )); // to produce BtnU_Pulse from BtnU
 		
 //------------
-// DESIGN
+// DESIGN (FINAL)
 	always @ (posedge sys_clk, posedge Reset)
 	begin
 		if(Reset)
@@ -163,14 +165,14 @@ ee354_debouncer #(.N_dc(28)) ee354_debouncer_0
 	end
 	
 	// the state machine module
-	ee354_GCD ee354_GCD_1(.Clk(sys_clk), .CEN(CEN_Pulse), .Reset(Reset), .Start(Start_Ack_Pulse), .Ack(Start_Ack_Pulse), 
+	ee354_GCD ee354_GCD_1(.Clk(sys_clk), .CEN(CEN_Pulse), .Reset(Reset), .Start(BtnL_Pulse), .Ack(BtnL_Pulse),  //Modified tp included correct states (final) TODO many things (chaged Start_Ack_Pulse to BtnL_Pulse
 						  .input_arr(input_arr), .Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count),
 						  .q_I(q_I), .q_Sub(q_Sub), .q_Mult(q_Mult), .q_Done(q_Done));
 
 //------------
 // OUTPUT: LEDS
 	
-	assign {Ld7, Ld6, Ld5, Ld4} = {q_I, q_Sub, q_Mult, q_Done};
+	assign {Ld7, Ld6, Ld5, Ld4} = {q_I, q_Sub, q_Mult, q_Done}; //Modified tp included correct states (final) TODO
 	assign {Ld3, Ld2, Ld1, Ld0} = {BtnL, BtnU, BtnR, BtnD}; // Reset is driven by BtnC
 	// Here
 	// BtnL = Start/Ack
@@ -195,10 +197,12 @@ ee354_debouncer #(.N_dc(28)) ee354_debouncer_0
 	// 191Hz (100 MHz / 2^19) works well
 	assign ssdscan_clk = DIV_CLK[19:18];
 	
-	assign An3	= !(~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 00
+	assign An3	= !(~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 00    TODO: enable all the leds (FINAL)
 	assign An2	= !(~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 01
 	assign An1	=  !((ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 10
 	assign An0	=  !((ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 11
+	
+	
 	// close another four anodes
 	assign An7 = 1'b1;
 	assign An6 = 1'b1;
