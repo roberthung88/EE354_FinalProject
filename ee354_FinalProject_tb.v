@@ -7,7 +7,7 @@ module ee354_FinalProject_tb_v;
 	reg Reset;
 	reg Start;
 	reg Ack;
-	integer input_arr [7:0][7:0];
+	integer input_arr [63:0];
 	
 
 	// Outputs
@@ -46,14 +46,11 @@ module ee354_FinalProject_tb_v;
 		
 		
 		//First stimulus (36,24)
-		input_arr = {{6, 1, 1, 0, 0, 0, 0, 0},
-             {4, -2, 5, 0, 0, 0, 0, 0},
-             {2, 8, 7, 0, 0, 0, 0, 0},
-             {0, 0, 0, 1, 0, 0, 0, 0},
-             {0, 0, 0, 0, 1, 0, 0, 0},
-             {0, 0, 0, 0, 0, 1, 0, 0},
-             {0, 0, 0, 0, 0, 0, 1, 0},
-             {0, 0, 0, 0, 0, 0, 0, 1}};
+		input_arr = {6, 1, 1, 0, 0, 0, 0, 0, 4, -2, 5, 0, 0, 0, 0, 0, 2, 8, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+             0, 0, 0, 0, 1, 0, 0, 0,
+             0, 0, 0, 0, 0, 1, 0, 0,
+             0, 0, 0, 0, 0, 0, 1, 0,
+             0, 0, 0, 0, 0, 0, 0, 1};
 		//make start signal active for one clock
 		@(posedge Clk);
 		#1;
