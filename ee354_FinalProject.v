@@ -73,10 +73,12 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 									for(j = 0; j < 4; j++) begin
 										if(j == sub_index[4])
 											j++;
-										three[indexi][indexj] = four[i][j];
-										indexi++;
-										indexj++;
+										else begin
+											three[indexi][indexj] = four[i][j];
+											indexj++;
+										end
 									end
+									indexi++;
 								end
 							end
 							3'b100: begin
@@ -87,11 +89,13 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 									for(j = 0; j < 5; j++) begin
 										if(j == sub_index[3])
 											j++;
-										four[indexi][indexj] = five[i][j];
-										indexi++;
-										indexj++;
+										else begin
+											four[indexi][indexj] = five[i][j];
+											indexj++;
+										end
 									end
-								end	
+									indexi++;
+								end
 							end
 							3'b101: begin
 								integer i, j, indexi, indexj;
@@ -101,11 +105,13 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 									for(j = 0; j < 6; j++) begin
 										if(j == sub_index[2])
 											j++;
-										five[indexi][indexj] = six[i][j];
-										indexi++;
-										indexj++;
+										else begin
+											five[indexi][indexj] = six[i][j];
+											indexj++;
+										end
 									end
-								end	
+									indexi++;
+								end
 							end
 							3'b110: begin
 								integer i, j, indexi, indexj;
@@ -115,11 +121,13 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 									for(j = 0; j < 7; j++) begin
 										if(j == sub_index[1])
 											j++;
-										six[indexi][indexj] = seven[i][j];
-										indexi++;
-										indexj++;
+										else begin
+											six[indexi][indexj] = seven[i][j];
+											indexj++;
+										end
 									end
-								end	
+									indexi++;
+								end
 							end
 							3'b111: begin
 								integer i, j, indexi, indexj;
@@ -129,10 +137,12 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 									for(j = 0; j < 8; j++) begin
 										if(j == sub_index[0])
 											j++;
-										seven[indexi][indexj] = input_arr[i][j];
-										indexi++;
-										indexj++;
+										else begin
+											seven[indexi][indexj] = input_arr[i][j];
+											indexj++;
+										end
 									end
+									indexi++;
 								end	
 							end
 							default: //hopefully we don't arrive here!
@@ -143,17 +153,17 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 				COMP:
 					begin
 						// state transfers
-						if(sub_index[0] == 7 && sub_index[1] == 6 && sub_index[2] == 5 && sub_index[3] == 4 && sub_index[4] == 3){
+						if(sub_index[0] == 7 && sub_index[1] == 6 && sub_index[2] == 5 && sub_index[3] == 4 && sub_index[4] == 3)
 							//calculating the very last matrix
 							state <= DONE;
-						}else{
+						else
 							state <= LOAD;
-						}
+						
 						
 						// data transfers
-						if(size_curr != 3){
+						if(size_curr != 3)
 							size_curr--;
-						}else{
+						else begin
 							integer a = three[0][0];
 							integer b = three[0][1];
 							integer c = three[0][2];
@@ -168,77 +178,84 @@ module ee354_FinalProject(Clk, CEN, Reset, Start, Ack, input_arr, det, q_I, q_Lo
 							temp_val[5] = a*(e*i-f*h) - b*(d*i-f*g) + c*(d*h-e*g);
 
 							// add det to 4x4
-							if(sub_index[4] % 2 == 0){
+							if(sub_index[4] % 2 == 0)
 								temp_val[4] += (temp_val[5]*four[0][sub_index[4]]);
-							}else{
+							else
 								temp_val[4] -= (temp_val[5]*four[0][sub_index[4]]);
-							}
+							
 
 							//calculated very last 3x3 matrix
-							if(sub_index[4] == 3){
+							if(sub_index[4] == 3) begin
 								sub_index[4] = 0;
 								size_curr++;
 								// update values
-								if(sub_index[3] % 2 == 0){
+								if(sub_index[3] % 2 == 0)
 									temp_val[3] += (temp_val[4]*five[0][sub_index[3]]);
-								}else{
+								else
 									temp_val[3] -= (temp_val[4]*five[0][sub_index[3]]);
-								}
+								temp_val[4] = 0;
 
 								// calculated very last 4x4 matrix
-								if(sub_index[3] == 4){
+								if(sub_index[3] == 4) begin
 									sub_index[3] = 0;
 									size_curr++;
 									// update values
-									if(sub_index[2] % 2 == 0){
+									if(sub_index[2] % 2 == 0)
 										temp_val[2] += (temp_val[3]*six[0][sub_index[2]]);
-									}else{
+									else
 										temp_val[2] -= (temp_val[3]*six[0][sub_index[2]]);
-									}
+									temp_val[3] = 0;
+
 									// calculated very last 5x5 matrix
-									if(sub_index[2] == 5){
+									if(sub_index[2] == 5) begin
 										sub_index[2] = 0;
 										size_curr++;
 										// update values
-										if(sub_index[1] % 2 == 0){
+										if(sub_index[1] % 2 == 0)
 											temp_val[1] += (temp_val[2]*seven[0][sub_index[1]]);
-										}else{
+										else
 											temp_val[1] -= (temp_val[2]*seven[0][sub_index[1]]);
-										}
+										temp_val[2] = 0;
+
 										// calculated very last 6x6 matrix
-										if(sub_index[1] == 6){
+										if(sub_index[1] == 6) begin
 											sub_index[1] = 0;
 											size_curr++;
 											// update values
-											if(sub_index[0] % 2 == 0){
+											if(sub_index[0] % 2 == 0)
 												temp_val[0] += (temp_val[1]*input_arr[0][sub_index[0]]);
-											}else{
+											else
 												temp_val[0] -= (temp_val[1]*input_arr[0][sub_index[0]]);
-											}
+											
 											// calculated very last 7x7 matrix
-											if(sub_index[0] == 7){
+											if(sub_index[0] == 7) begin
 												//calculated everything
 												temp_val[0] -= (temp_val[1]*input_arr[0][sub_index[0]]);
 												det <= temp_val[0];
-											}else{
+											end
+											else begin
+												temp_val[1] = 0;
 												sub_index[0]++;
-											}
-										}else{
+											end
+											
+										end
+										else
 											sub_index[1]++;
-										}
-									}else{
+										
+									end
+									else
 										sub_index[2]++;
-									}
-								}else{
+									
+								end
+								else
 									// calculate next 4x4
 									sub_index[3]++;
-								}
-							}else{
+								
+							end
+							else
 								// haven't calculated very last 3x3 matrix, so calculate next 3x3 det
 								sub_index[4]++;
-							}
-						}
-
+						end
 					end
 				DONE:
 					begin
