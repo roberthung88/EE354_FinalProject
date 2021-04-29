@@ -68,7 +68,7 @@ module ee354_FinalProject_top //modifed to use correct file (FINAL)
 	reg [3:0]	SSD; //widened (final)
 	wire [3:0]	SSD7, SSD6, SSD5, SSD4,SSD3, SSD2, SSD1, SSD0; //added all SSDs (FINAL)
 	reg [7:0]  SSD_CATHODES;
-	
+	reg [5:0] arrIndex; //added this
 	//added these new ones (FINAL)
 	wire [3:0] matrixInput;
 	wire [2:0] currRow;
@@ -147,40 +147,9 @@ ee354_debouncer #(.N_dc(28)) ee354_debouncer_0
 assign currRow = {Sw15, Sw14, Sw13};
 assign currColumn = {Sw12, Sw11, Sw10};
 assign matrixInput = {Sw3, Sw2, Sw1, Sw0};
-assign enterPulse =  BtnR_Pulse;
+assign enterPulse =  BtnR;
 
-// DESIGN (FINAL) DONT THINK WE NEED THIS ANYMORE SINCE WERE GOING TO INTILZE STATE ON RESET
-	// always @ (posedge sys_clk, posedge Reset)
-	// begin
-		// if(Reset)
-		// begin
-			////initialize matrix to identity matrix
-			// integer i, j;
-			// for(i = 0; i < 8; i++) begin
-				// for(j = 0; j < 8; j++) begin
-					// if(i == j)
-						// input_arr[i][i] <= 1;
-					// else
-						// input_arr[i][j] <= 0;
-				// end
-			// end
-		// end
-		// else
-		// begin
-			// if (in_AB_Pulse)  	// Note: in_AB_Pulse is same as BtnR_Pulse.
-			////					****** TODO  in Part 2 ******
-			////					Complete the lines below so that you deposit the value on switches
-			////					either in Ain or in Bin based on the value of the flag A_bar_slash_B. 
-			////					Also you need to toggle the value of the flag A_bar_slash_B.
-				// begin
-					// A_bar_slash_B <= ~ A_bar_slash_B;
-					// if (A_bar_slash_B == 1'b0)
-						// input_arr <= {Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0};
-					// else
-						// Bin <= {Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0};
-				// end
-		// end
-	// end
+
 	//reg [3:0] input_arr [63:0];
 	always @ (posedge sys_clk, posedge Reset)
 	begin 
@@ -189,14 +158,22 @@ assign enterPulse =  BtnR_Pulse;
 		//do something
 		else if (q_Enter == 1)
 		  begin : ArrayInputBlock
-		    reg [5:0] arrIndex;
+
             arrIndex = 8*currRow + currColumn;
+<<<<<<< HEAD
             if (enterPulse)
+=======
+            if (enterPulse==1)
+>>>>>>> e5004f3afcadc787f82b1026a587736e68fd3ff6
                 input_arr[arrIndex] <=  matrixInput;
             
             for(i = 0; i < 64; i=i+1) 
             begin
+<<<<<<< HEAD
 				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  PackedInput_array[i];
+=======
+				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  input_arr[i];
+>>>>>>> e5004f3afcadc787f82b1026a587736e68fd3ff6
 			end
             
 		  end
@@ -243,8 +220,8 @@ assign enterPulse =  BtnR_Pulse;
 	assign SSD4 = (q_Done) ? det[19:16]  : 4'b0000;
 	assign SSD3 = (q_Done) ? det[15:12]  : {1'b0,currRow};
 	assign SSD2 = (q_Done) ? det[11:08]  : {1'b0,currColumn};
-	assign SSD1 = (q_Done) ? det[07:04]  : 4'b0000;
-	assign SSD0 = (q_Done) ? det[03:00]  : matrixInput;
+	assign SSD1 = (q_Done) ? det[07:04]  : arrIndex[3:0];
+	assign SSD0 = (q_Done) ? det[03:00]  : input_arr[arrIndex];
 
 
 	// need a scan clk for the seven segment display 
