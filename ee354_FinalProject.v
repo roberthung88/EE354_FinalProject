@@ -7,12 +7,13 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr, det, q_I, q_Enter, q_Load, q_Comp, q_Done);
+module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr_flat, det, q_I, q_Enter, q_Load, q_Comp, q_Done);
 
 
 	/*  INPUTS */
 	input	Clk, Reset, Start, Ack;
-	input [63:0] input_arr;
+	input [255:0] input_arr_flat;
+	
 	
 	
 	/*  OUTPUTS */
@@ -33,7 +34,7 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr, det, q_I, q_Enter, 
 	reg [2:0] size_curr; //current size of matrix being worked on
 	reg [2:0] sub_index [4:0]; //column to "ignore" while calculating determinant
 	integer i, j, indexi, indexj, a, b, c, d, e, f, g, h, k;
-	
+	reg [3:0] input_arr[63:0];
 	localparam 	
 	I = 5'b00001, ENTER = 5'b00010, LOAD = 5'b00100, COMP = 5'b01000, DONE = 5'b10000, UNK = 5'bXXXXX;
 	
@@ -42,13 +43,14 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr, det, q_I, q_Enter, 
 	begin
 		if(Reset) begin
 			state <= I;		  	
-			size_curr = 3'bx;
+			size_curr <= 3'bx;
 			for(i = 0; i < 5; i=i+1) begin
-				sub_index[i] = 3'bx;
+				sub_index[i] <= 3'bx;
 			end
 			for(i = 0; i < 6; i=i+1) begin
-				temp_val[i] = 'x;
+				temp_val[i] <= 'x;
 			end
+			
 			
 		end
 		else				
@@ -58,18 +60,24 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr, det, q_I, q_Enter, 
 					// state transfers on start condtion
 					state <= ENTER;
 					// data transfers
-					size_curr = 3'd7;
+					size_curr <= 3'd7;
 					for(i = 0; i < 5; i=i+1) begin
-						sub_index[i] = 3'b0;
+						sub_index[i] <= 3'b0;
 					end
 					for(i = 0; i < 6; i=i+1) begin
-						temp_val[i] = 0;
+						temp_val[i] <= 0;
 					end
+					
 						
 				end	
 				ENTER:
 				begin
-					if (Start) state <= LOAD;
+					if (Start) begin
+						state <= LOAD;
+						for(i = 0; i < 64; i=i+1) begin
+							input_arr[i] <=  input_arr_flat[i*4+:4];
+						end
+					end
 						
 				end	
 				LOAD:
@@ -82,82 +90,72 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr, det, q_I, q_Enter, 
 							3'b001: ;//impossible case
 							3'b010: ;//impossible case must be at least a 3X3
 							3'b011: begin
-								
 								indexi = 0;
 								indexj = 0;
 								for(i = 1; i < 4; i=i+1) begin
 									for(j = 0; j < 4; j=j+1) begin
-										if(j == sub_index[4])
-											j=j+1;
-										else begin
-											three[indexi][indexj] = four[i][j];
+										if(!(j == sub_index[4])) begin										
+											three[indexi][indexj] <= four[i][j];
 											indexj=indexj+1;
 										end
 									end
+									indexj = 0;
 									indexi=indexi+1;
 								end
 							end
 							3'b100: begin
-								
 								indexi = 0;
 								indexj = 0;
 								for(i = 1; i < 5; i=i+1) begin
 									for(j = 0; j < 5; j=j+1) begin
-										if(j == sub_index[3])
-											j=j+1;
-										else begin
-											four[indexi][indexj] = five[i][j];
+										if(!(j == sub_index[3])) begin										
+											four[indexi][indexj] <= five[i][j];
 											indexj=indexj+1;
 										end
 									end
+									indexj = 0;
 									indexi=indexi+1;
 								end
 							end
 							3'b101: begin
-								
 								indexi = 0;
 								indexj = 0;
 								for(i = 1; i < 6; i=i+1) begin
 									for(j = 0; j < 6; j=j+1) begin
-										if(j == sub_index[2])
-											j=j+1;
-										else begin
-											five[indexi][indexj] = six[i][j];
+										if(!(j == sub_index[2])) begin										
+											five[indexi][indexj] <= six[i][j];
 											indexj=indexj+1;
 										end
 									end
+									indexj = 0;
 									indexi=indexi+1;
 								end
 							end
 							3'b110: begin
-								
 								indexi = 0;
 								indexj = 0;
 								for(i = 1; i < 7; i=i+1) begin
 									for(j = 0; j < 7; j=j+1) begin
-										if(j == sub_index[1])
-											j=j+1;
-										else begin
-											six[indexi][indexj] = seven[i][j];
+										if(!(j == sub_index[1])) begin										
+											six[indexi][indexj] <= seven[i][j];
 											indexj=indexj+1;
 										end
 									end
+									indexj = 0;
 									indexi=indexi+1;
 								end
 							end
 							3'b111: begin
-								
 								indexi = 0;
 								indexj = 0;
 								for(i = 1; i < 8; i=i+1) begin
 									for(j = 0; j < 8; j=j+1) begin
-										if(j == sub_index[0])
-											j=j+1;
-										else begin
-											seven[indexi][indexj] = input_arr[i*8+j];
+										if(!(j == sub_index[0])) begin										
+											seven[indexi][indexj] <= input_arr[i*8+j];
 											indexj=indexj+1;
 										end
 									end
+									indexj = 0;
 									indexi=indexi+1;
 								end	
 							end
@@ -247,7 +245,7 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr, det, q_I, q_Enter, 
 											if(sub_index[0] == 7) begin
 												//calculated everything
 												temp_val[0] = temp_val[0]-(temp_val[1]*input_arr[sub_index[0]]);
-												det <= temp_val[0];
+												det = temp_val[0];
 											end
 											else begin
 												temp_val[1] = 0;
@@ -279,7 +277,7 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr, det, q_I, q_Enter, 
 						if(Ack)
 							state <= I;
 						// data transfers
-						
+						det = temp_val[0];
 					end
 				default:		
 					state <= UNK;

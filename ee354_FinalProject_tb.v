@@ -7,11 +7,11 @@ module ee354_FinalProject_tb_v;
 	reg Reset;
 	reg Start;
 	reg Ack;
-	integer input_arr [63:0];
-	
+	//reg [7:0] input_arr[7:0][7:0];
+	reg [511:0] input_flat;
 
 	// Outputs
-	wire [31:0] det;
+	wire signed [31:0] det;
 	wire q_I;
 	wire q_Load;
 	wire q_Comp;
@@ -20,7 +20,7 @@ module ee354_FinalProject_tb_v;
 	reg [6*8:0] state_string;
 	integer clk_cnt, start_clock_cnt,clocks_taken;
 	// Instantiate the Unit Under Test (UUT)
-	ee354_FinalProject(.Clk(Clk), .Reset(Reset), .Start(Start), .Ack(Ack), .input_arr(input_arr), .det(det), .q_I(q_I), .q_Enter(q_Enter). .q_Load(q_Load), .q_Comp(q_Comp), .q_Done(q_Done));
+	ee354_FinalProject uut(.Clk(Clk), .Reset(Reset), .Start(Start), .Ack(Ack), .input_arr_flat(input_flat), .det(det), .q_I(q_I), .q_Enter(q_Enter), .q_Load(q_Load), .q_Comp(q_Comp), .q_Done(q_Done));
 	
 		
 		
@@ -44,13 +44,23 @@ module ee354_FinalProject_tb_v;
 		#1;
 		Reset=0;
 		
+		input_flat = {{4'd1, 4'd0, 4'd0, 4'd0, 4'd0, 4'd0, 4'd0, 4'd0},{4'd0, 4'd1, 4'd0, 4'd0, 4'd0, 4'd0, 4'd0, 4'd0},
+		{4'd0, 4'd0, 4'd1, 4'd0, 4'd0,4'd0, 4'd0, 4'd0},{4'd0, 4'd0, 4'd0, 4'd1, 4'd0, 4'd0, 4'd0, 4'd0},{4'd0, 4'd0, 4'd0, 4'd0, 4'd1, 4'd0, 4'd0, 4'd0},
+		{4'd0,4'd0,4'd0,4'd0,4'd0,4'd7,4'd8,4'd2},{4'd0,4'd0,4'd0,4'd0,4'd0,4'd5,4'd2,4'd4},
+		{4'd0,4'd0,4'd0,4'd0,4'd0,4'd1,4'd1,4'd9}};
 		
+	
 		//First stimulus (36,24)
-		input_arr = {6, 1, 1, 0, 0, 0, 0, 0, 4, -2, 5, 0, 0, 0, 0, 0, 2, 8, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-             0, 0, 0, 0, 1, 0, 0, 0,
-             0, 0, 0, 0, 0, 1, 0, 0,
-             0, 0, 0, 0, 0, 0, 1, 0,
-             0, 0, 0, 0, 0, 0, 0, 1};
+		/* input_arr[0] = {8'd9, 8'd1, 8'd1, 0, 0, 0, 0, 0};
+		input_arr[1] = {8'd4, -8'd2, 8'd5, 0, 0, 0, 0, 0};
+		input_arr[2] = {8'd2, 8'd8, 8'd7, 0, 0, 0, 0, 0};
+		input_arr[3] = {0, 0, 0, 1, 0, 0, 0, 0};
+		input_arr[4] = {0, 0, 0, 0, 1, 0, 0, 0};
+		input_arr[5] = {0, 0, 0, 0, 0, 1, 0, 0};
+		input_arr[6] = {0, 0, 0, 0, 0, 0, 1, 0};
+		input_arr[7] = {0, 0, 0, 0, 0, 0, 0, 1}; */
+		
+			
 		//make start signal active for one clock
 		@(posedge Clk);
 		#1;
