@@ -155,27 +155,18 @@ assign enterPulse =  BtnR;
 	begin 
 		if (Reset) 
             input_arr[0] <=  4'bX;
+
 		//do something
 		else if (q_Enter == 1)
 		  begin : ArrayInputBlock
-
             arrIndex = 8*currRow + currColumn;
-<<<<<<< HEAD
             if (enterPulse)
-=======
-            if (enterPulse==1)
->>>>>>> e5004f3afcadc787f82b1026a587736e68fd3ff6
                 input_arr[arrIndex] <=  matrixInput;
             
             for(i = 0; i < 64; i=i+1) 
             begin
-<<<<<<< HEAD
 				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  PackedInput_array[i];
-=======
-				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  input_arr[i];
->>>>>>> e5004f3afcadc787f82b1026a587736e68fd3ff6
 			end
-            
 		  end
 	end
 	

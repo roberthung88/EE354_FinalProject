@@ -35,9 +35,13 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr_flat, det, q_I, q_En
 	reg [2:0] sub_index [4:0]; //column to "ignore" while calculating determinant
 	integer i, j, indexi, indexj, a, b, c, d, e, f, g, h, k;
 	reg [3:0] input_arr[63:0];
+	reg [255:0] temp_input;
+
+
 	localparam 	
 	I = 5'b00001, ENTER = 5'b00010, LOAD = 5'b00100, COMP = 5'b01000, DONE = 5'b10000, UNK = 5'bXXXXX;
 	
+	assign input_arr_flat = temp_input;
 	// NSL AND SM
 	always @ (posedge Clk, posedge Reset)
 	begin
