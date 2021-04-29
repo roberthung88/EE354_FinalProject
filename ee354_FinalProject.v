@@ -50,9 +50,7 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr_flat, det, q_I, q_En
 			for(i = 0; i < 6; i=i+1) begin
 				temp_val[i] <= 6'bx;
 			end
-			for(i = 0; i < 256; i=i+1) begin
-				input_arr_flat[i] <= 0;
-			end
+			input_arr_flat <= 256'b0;
 		end
 		else				
 			case(state)	
@@ -68,8 +66,6 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr_flat, det, q_I, q_En
 					for(i = 0; i < 6; i=i+1) begin
 						temp_val[i] <= 0;
 					end
-					
-						
 				end	
 				ENTER:
 				begin
