@@ -25,7 +25,7 @@ module ee354_FinalProject_top //modifed to use correct file (FINAL)
 		BtnL, BtnU, BtnD, BtnR,            // the Left, Up, Down, and the Right buttons BtnL, BtnR,
 		BtnC,                              // the center button (this is our reset in most of our designs)
 		Sw15, Sw14, Sw13, Sw12, Sw11, Sw10, Sw3, Sw2, Sw1, Sw0, // 8 switches
-		Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0, // 8 LEDs
+		Ld8, Ld7, Ld6, Ld5, Ld4, Ld3, Ld2, Ld1, Ld0, // 8 LEDs
 		An3, An2, An1, An0,			       // 4 anodes
 		An7, An6, An5, An4,                // another 4 anodes which are not used
 		Ca, Cb, Cc, Cd, Ce, Cf, Cg,        // 7 cathodes
@@ -45,7 +45,7 @@ module ee354_FinalProject_top //modifed to use correct file (FINAL)
 	output 	MemOE, MemWR, RamCS, QuadSpiFlashCS;
 	// Project Specific Outputs
 	// LEDs
-	output 	Ld0, Ld1, Ld2, Ld3, Ld4, Ld5, Ld6, Ld7;
+	output 	Ld0, Ld1, Ld2, Ld3, Ld4, Ld5, Ld6, Ld7, Ld8;
 	// SSD Outputs
 	output 	Cg, Cf, Ce, Cd, Cc, Cb, Ca, Dp;
 	output 	An0, An1, An2, An3;	
@@ -61,7 +61,7 @@ module ee354_FinalProject_top //modifed to use correct file (FINAL)
 	wire in_AB_Pulse, CEN_Pulse, BtnR_Pulse, BtnU_Pulse; 
 	wire q_I, q_Enter, q_Load, q_Comp, q_Done; //changed this to include correct state (FINAL) 
 	//wire [7:0] A, B, AB_GCD, i_count; removed
-	reg [3:0] input_arr [63:0]; //Added this for the input array (FINAL) removed integer
+	//reg [3:0] input_arr [63:0]; //Added this for the input array (FINAL) removed integer
 	reg [255:0] PackedInput_array ;
 	wire signed [31:0] det; // added this reg to hold det
 	// [31:28] [27:24] [23:20] [
@@ -118,7 +118,7 @@ module ee354_FinalProject_top //modifed to use correct file (FINAL)
 //-------------------	
 	// In this design, we run the core design at full 100MHz clock!
 	//assign	sys_clk = board_clk;
-	assign	sys_clk = DIV_CLK[20]; //was 25
+	assign	sys_clk = DIV_CLK[10]; //was 25
 
 //------------
 // INPUT: SWITCHES & BUTTONS
@@ -154,20 +154,28 @@ assign enterPulse =  BtnR;
 	always @ (posedge sys_clk, posedge Reset)
 	begin 
 		if (Reset) begin
-			for(i = 0; i < 64; i=i+1)
-				input_arr[i] <=  4'b0;
+           PackedInput_array <=  256'b0;
+           PackedInput_array[0] <= 1'b1;
+           PackedInput_array[36] <= 1'b1;
+           PackedInput_array[72] <= 1'b1;
+           PackedInput_array[108] <= 1'b1;
+           PackedInput_array[144] <= 1'b1;
+           PackedInput_array[180] <= 1'b1;
+           PackedInput_array[216] <= 1'b1;
+           PackedInput_array[252] <= 1'b1;
 		end
 		//do something
 		else if (q_Enter == 1)
 		  begin : ArrayInputBlock
-            arrIndex = 8*currRow + currColumn;
+            arrIndex = 32*currRow + currColumn*4;
             if (enterPulse)
-                input_arr[arrIndex] <=  matrixInput;
+                //input_arr[arrIndex] <=  matrixInput;
+                PackedInput_array[arrIndex+:4] <= matrixInput;
             
-            for(i = 0; i < 64; i=i+1) 
+           /* for(i = 0; i < 64; i=i+1) 
             begin
 				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  input_arr[i];
-			end
+			end*/
             
 		  end
 	end
@@ -178,7 +186,7 @@ assign enterPulse =  BtnR;
 	//					  .input_arr(input_arr), //.Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count), dont think I need any of this
 	//					  .q_I(q_I), .q_Sub(q_Sub), .q_Mult(q_Mult), .q_Done(q_Done)); 
 	//					  
-	ee354_FinalProject ee354_FinalProject1(.Clk(sys_clk), .Reset(Reset), .Start(BtnL), .Ack(BtnL),  //Modified tp included correct states (final) TODO many things (chaged Start_Ack_Pulse to BtnL_Pulse
+	ee354_FinalProject ee354_FinalProject1(.Clk(sys_clk), .Reset(Reset), .Start(BtnL), .Ack(BtnU),  //Modified tp included correct states (final) TODO many things (chaged Start_Ack_Pulse to BtnL_Pulse
 						  .input_arr_flat(PackedInput_array), .det(det), //.Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count), <-dont think I need any of this
 						  .q_I(q_I), .q_Enter(q_Enter), .q_Load(q_Load),.q_Comp(q_Comp), .q_Done(q_Done)); 
 
@@ -191,11 +199,11 @@ assign enterPulse =  BtnR;
 
 
 	
-	assign {Ld7, Ld6, Ld5, Ld4,  Ld3} = {q_I, q_Enter, q_Load ,q_Comp, q_Done}; //Modified tp included correct states (final) TODO
-	assign {Ld2 ,Ld1, Ld0} = {BtnC, BtnL, BtnR}; // Reset is driven by BtnC
+	assign {Ld8, Ld7, Ld6, Ld5, Ld4} = {q_I, q_Enter, q_Load ,q_Comp, q_Done}; //Modified tp included correct states (final) TODO
+	assign {Ld3, Ld2 ,Ld1, Ld0} = {BtnU, BtnC, BtnL, BtnR}; // Reset is driven by BtnC
 	// Here
-	// BtnL = Start/Ack
-	// BtnU = Single-Step
+	// BtnL = Start
+	// BtnU = Ack
 	// BtnR = in_A_in_B
 	// BtnD = not used here
 	
@@ -214,7 +222,7 @@ assign enterPulse =  BtnR;
 	assign SSD3 = (q_Done) ? det[15:12]  : {1'b0,currRow};
 	assign SSD2 = (q_Done) ? det[11:08]  : {1'b0,currColumn};
 	assign SSD1 = (q_Done) ? det[07:04]  : arrIndex[3:0];
-	assign SSD0 = (q_Done) ? det[03:00]  : input_arr[arrIndex];
+	assign SSD0 = (q_Done) ? det[03:00]  : PackedInput_array[arrIndex+:4];
 
 
 	// need a scan clk for the seven segment display 
@@ -224,10 +232,10 @@ assign enterPulse =  BtnR;
 	assign An1	= !(~(ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 001
 	assign An2	=  !(~(ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 010
 	assign An3	=  !(~(ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 011
-	assign An4	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 100
-	assign An5	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 101
-	assign An6	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 110
-	assign An7	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 111
+	 assign An4	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 100
+	 assign An5	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 101
+	 assign An6	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 110
+	 assign An7	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 111
 	
 	
 
