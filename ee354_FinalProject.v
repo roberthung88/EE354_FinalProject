@@ -48,7 +48,7 @@ module ee354_FinalProject(Clk, Reset, Start, Ack, input_arr_flat, det, q_I, q_En
 				sub_index[i] <= 3'bx;
 			end
 			for(i = 0; i < 6; i=i+1) begin
-				temp_val[i] <= 'x;
+				temp_val[i] <= 6'bx;
 			end
 			
 			
