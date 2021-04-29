@@ -154,8 +154,8 @@ assign enterPulse =  BtnR;
 	always @ (posedge sys_clk, posedge Reset)
 	begin 
 		if (Reset) begin
-		  for(i = 0; i < 64; i=i+1)
-            input_arr[i] <=  4'b0;
+			for(i = 0; i < 64; i=i+1)
+				input_arr[i] <=  4'b0;
 		end
 		//do something
 		else if (q_Enter == 1)
@@ -166,7 +166,7 @@ assign enterPulse =  BtnR;
             
             for(i = 0; i < 64; i=i+1) 
             begin
-				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  PackedInput_array[i];
+				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  input_arr[i];
 			end
             
 		  end
@@ -178,7 +178,7 @@ assign enterPulse =  BtnR;
 	//					  .input_arr(input_arr), //.Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count), dont think I need any of this
 	//					  .q_I(q_I), .q_Sub(q_Sub), .q_Mult(q_Mult), .q_Done(q_Done)); 
 	//					  
-	ee354_FinalProject ee354_FinalProject1(.Clk(sys_clk), .Reset(Reset), .Start(BtnL_Pulse), .Ack(BtnL_Pulse),  //Modified tp included correct states (final) TODO many things (chaged Start_Ack_Pulse to BtnL_Pulse
+	ee354_FinalProject ee354_FinalProject1(.Clk(sys_clk), .Reset(Reset), .Start(BtnL), .Ack(BtnL),  //Modified tp included correct states (final) TODO many things (chaged Start_Ack_Pulse to BtnL_Pulse
 						  .input_arr_flat(PackedInput_array), .det(det), //.Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count), <-dont think I need any of this
 						  .q_I(q_I), .q_Enter(q_Enter), .q_Load(q_Load),.q_Comp(q_Comp), .q_Done(q_Done)); 
 
@@ -224,10 +224,10 @@ assign enterPulse =  BtnR;
 	assign An1	= !(~(ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 001
 	assign An2	=  !(~(ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 010
 	assign An3	=  !(~(ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 011
-	 assign An4	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 100
-	 assign An5	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 101
-	 assign An6	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 110
-	 assign An7	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 111
+	assign An4	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 100
+	assign An5	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 101
+	assign An6	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 110
+	assign An7	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 111
 	
 	
 
