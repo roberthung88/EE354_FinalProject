@@ -153,9 +153,10 @@ assign enterPulse =  BtnR;
 	//reg [3:0] input_arr [63:0];
 	always @ (posedge sys_clk, posedge Reset)
 	begin 
-		if (Reset) 
-            input_arr[0] <=  4'bX;
-
+		if (Reset) begin
+		  for(i = 0; i < 64; i=i+1)
+            input_arr[i] <=  4'b0;
+		end
 		//do something
 		else if (q_Enter == 1)
 		  begin : ArrayInputBlock
@@ -167,6 +168,7 @@ assign enterPulse =  BtnR;
             begin
 				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  PackedInput_array[i];
 			end
+            
 		  end
 	end
 	
