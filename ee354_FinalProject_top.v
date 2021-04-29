@@ -1,23 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////////
-// Author:			Shideh Shahidi, Bilal Zafar, Gandhi Puvvada
+// Author:			Robert Hung
 // Create Date:		02/25/08
 // File Name:		ee354_FinalProject.v 
 // Description: 
-//
-//
-// Revision: 		2.2
-// Additional Comments: 
-// 10/13/2008 debouncing and single_clock_wide pulse_generation modules are added by Gandhi
-// 10/13/2008 Clock Enable (CEN) has been added by Gandhi
-//  3/ 1/2010 The Spring 2009 debounce design is replaced by the Spring 2010 debounce design
-//            Now, in part 2 of the GCD lab, we do single-stepping 
-//  2/19/2012 Nexys-2 to Nexys-3 conversion done by Gandhi
-//  02/20/2020 Nexys-3 to Nexys-4 conversion done by Yue (Julien) Niu
 //////////////////////////////////////////////////////////////////////////////////
 
 `timescale 1ns / 1ps
 
-module ee354_FinalProject_top //modifed to use correct file (FINAL)
+module ee354_FinalProject_top 
 		(MemOE, MemWR, RamCS, QuadSpiFlashCS, // Disable the three memory chips
 
         ClkPort,                           // the 100 MHz incoming clock signal
@@ -59,12 +49,9 @@ module ee354_FinalProject_top //modifed to use correct file (FINAL)
 	
 	wire BtnL_Pulse; //was Start_Ack_Pulse (final)
 	wire in_AB_Pulse, CEN_Pulse, BtnR_Pulse, BtnU_Pulse; 
-	wire q_I, q_Enter, q_Load, q_Comp, q_Done; //changed this to include correct state (FINAL) 
-	//wire [7:0] A, B, AB_GCD, i_count; removed
-	//reg [3:0] input_arr [63:0]; //Added this for the input array (FINAL) removed integer
+	wire q_I, q_Enter, q_Load, q_Comp, q_Done; 
 	reg [255:0] PackedInput_array ;
 	wire signed [31:0] det; // added this reg to hold det
-	// [31:28] [27:24] [23:20] [
 	reg [3:0]	SSD; //widened (final)
 	wire [3:0]	SSD7, SSD6, SSD5, SSD4,SSD3, SSD2, SSD1, SSD0; //added all SSDs (FINAL)
 	reg [7:0]  SSD_CATHODES;
@@ -118,21 +105,14 @@ module ee354_FinalProject_top //modifed to use correct file (FINAL)
 //-------------------	
 	// In this design, we run the core design at full 100MHz clock!
 	//assign	sys_clk = board_clk;
-	assign	sys_clk = DIV_CLK[10]; //was 25
+	assign	sys_clk = DIV_CLK[10]; 
 
 //------------
 // INPUT: SWITCHES & BUTTONS
-	// BtnL is used as both Start and Acknowledge. 
-	// Is the debouncing of the start/ack signal necessary? Discuss with your TA
-
 ee354_debouncer #(.N_dc(28)) ee354_debouncer_2 
         (.CLK(sys_clk), .RESET(Reset), .PB(BtnL), .DPB( ),
 		.SCEN(BtnL_Pulse), .MCEN( ), .CCEN( )); // changed from Start_Ack_Pulse to BtnL_Pulse (final)
 		 		 
-		 // BtnR is used to generate in_AB_Pulse to record the values of need to modify this TODO(FINAL)
-		 // the inputs A and B as set on the switches.
-		 // BtnU is used as CEN_Pulse to allow single-stepping
-	//assign {in_AB_Pulse, CEN_Pulse} = {BtnR_Pulse, BtnU_Pulse}; not used so i took it out (final)
 
 ee354_debouncer #(.N_dc(28)) ee354_debouncer_1 
         (.CLK(sys_clk), .RESET(Reset), .PB(BtnR), .DPB( ), 
@@ -149,8 +129,6 @@ assign currColumn = {Sw12, Sw11, Sw10};
 assign matrixInput = {Sw3, Sw2, Sw1, Sw0};
 assign enterPulse =  BtnR;
 
-
-	//reg [3:0] input_arr [63:0];
 	always @ (posedge sys_clk, posedge Reset)
 	begin 
 		if (Reset) begin
@@ -169,52 +147,26 @@ assign enterPulse =  BtnR;
 		  begin : ArrayInputBlock
             arrIndex = 32*currRow + currColumn*4;
             if (enterPulse)
-                //input_arr[arrIndex] <=  matrixInput;
                 PackedInput_array[arrIndex+:4] <= matrixInput;
-            
-           /* for(i = 0; i < 64; i=i+1) 
-            begin
-				{PackedInput_array[4*i+3],PackedInput_array[4*i+2],PackedInput_array[4*i+1],PackedInput_array[4*i]} <=  input_arr[i];
-			end*/
-            
 		  end
 	end
-	
-	// the state machine module
-	//ee354_GCD ee354_GCD_1(.Clk(sys_clk), .CEN(CEN_Pulse), .Reset(Reset), .Start(BtnL_Pulse), .Ack(BtnL_Pulse),  //Modified tp included correct states (final) TODO many things (chaged Start_Ack_Pulse to BtnL_Pulse
-	//					  .Enter(BtnR_Pulse)//added enter 
-	//					  .input_arr(input_arr), //.Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count), dont think I need any of this
-	//					  .q_I(q_I), .q_Sub(q_Sub), .q_Mult(q_Mult), .q_Done(q_Done)); 
-	//					  
+		  
 	ee354_FinalProject ee354_FinalProject1(.Clk(sys_clk), .Reset(Reset), .Start(BtnL), .Ack(BtnU),  //Modified tp included correct states (final) TODO many things (chaged Start_Ack_Pulse to BtnL_Pulse
 						  .input_arr_flat(PackedInput_array), .det(det), //.Bin(Bin), .A(A), .B(B), .AB_GCD(AB_GCD), .i_count(i_count), <-dont think I need any of this
 						  .q_I(q_I), .q_Enter(q_Enter), .q_Load(q_Load),.q_Comp(q_Comp), .q_Done(q_Done)); 
 
 //------------
 // OUTPUT: LEDS
-
-
-
-
-
-
-	
 	assign {Ld8, Ld7, Ld6, Ld5, Ld4} = {q_I, q_Enter, q_Load ,q_Comp, q_Done}; //Modified tp included correct states (final) TODO
-	assign {Ld3, Ld2 ,Ld1, Ld0} = {BtnU, BtnC, BtnL, BtnR}; // Reset is driven by BtnC
+	assign {Ld3, Ld2 ,Ld1, Ld0} = {BtnU, BtnC, BtnL, BtnR}; 
 	// Here
 	// BtnL = Start
 	// BtnU = Ack
-	// BtnR = in_A_in_B
-	// BtnD = not used here
+	// BtnR = Enter
+	// BtnC = Reset
 	
 //------------
 // SSD (Seven Segment Display)
-	
-	//SSDs show Ain and Bin in initial state, A and B in subtract state, and GCD and i_count in multiply and done states.
-	// ****** TODO  in Part 2 ******
-	// assign y = s ? i1 : i0;  // an example of a 2-to-1 mux coding
-	// assign y = s1 ? (s0 ? i3: i2): (s0 ? i1: i0); // an example of a 4-to-1 mux coding 
-	//TODO (final) 
 	assign SSD7 = (q_Done) ? det[31:28]  : 4'b0000;
 	assign SSD6 = (q_Done) ? det[27:24]  : 4'b0000;
 	assign SSD5 = (q_Done) ? det[23:20]  : 4'b0000;
@@ -232,10 +184,10 @@ assign enterPulse =  BtnR;
 	assign An1	= !(~(ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 001
 	assign An2	=  !(~(ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 010
 	assign An3	=  !(~(ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 011
-	 assign An4	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 100
-	 assign An5	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 101
-	 assign An6	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 110
-	 assign An7	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 111
+	assign An4	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 100
+	assign An5	= !((ssdscan_clk[2]) && ~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 101
+	assign An6	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 110
+	assign An7	=  !((ssdscan_clk[2]) && (ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 111
 	
 	
 
